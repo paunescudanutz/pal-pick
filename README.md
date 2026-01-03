@@ -27,11 +27,19 @@ palpick - a terminal color picker
 
 ## Examples
 
+```h
+palpick --pre "Vec3(" --post ")" \
+          --separator1 ", " --separator2 ", "
+# Output:
+# Vec3(123, 34, 105)
+```
+
 ```sh
-<command> --separator1 "; " --separator2 "; " \
+palpick --separator1 "; " --separator2 "; " \
           --red-label "R: " \
           --green-label "G: " \
           --blue-label "B: "
-```
+
 # Output:
 # R: 123; G: 34; B: 105
+```
