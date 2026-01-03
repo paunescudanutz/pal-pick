@@ -28,6 +28,10 @@ palpick - a terminal color picker
 ## Examples
 
 ```sh
-<command> --pre "Vec3(" --post ")" \
-          --separator1 ", " --separator2 ", "
-# → Vec3(123, 34, 105)
+<command> --separator1 "; " --separator2 "; " \
+          --red-label "R: " \
+          --green-label "G: " \
+          --blue-label "B: "
+```
+# Output:
+# R: 123; G: 34; B: 105
