@@ -27,9 +27,8 @@ palpick - a terminal color picker
 
 ## Examples
 
-```h
-palpick --pre "Vec3(" --post ")" \
-          --separator1 ", " --separator2 ", "
+```sh
+palpick --pre "Vec3(" --post ")" --separator1 ", " --separator2 ", "
 # Output:
 # Vec3(123, 34, 105)
 ```
