@@ -1,3 +1,0 @@
-[INFO] : src/main.c: parseParams(): 243: parsing input params
-[INFO] : src/main.c: main(): 300: ansi-picker running:
-[INFO] : src/main.c: main(): 431: ansi-picker closed!
