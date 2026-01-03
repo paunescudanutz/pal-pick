@@ -1,4 +1,4 @@
-palpick - a terminal color picker
+# Palpick - a terminal color picker
 ## Usage
 
 ### Controls
