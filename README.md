@@ -43,12 +43,12 @@ palpick --separator1 "; " --separator2 "; " \
 # R: 123; G: 34; B: 105
 ```
 
-
 ## Installation guide 
 ### Build from source
-
+No shared libs need to be linked. All dependecies are part of the project.
 ```bash
 # cd to your folder
 git clone https://github.com/paunescudanutz/pal-pick.git
 gcc src/*.c -lm -o bin/palpick
 ```
+Your executable should be found at `<root of directory>/bin/palpick`
