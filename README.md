@@ -42,3 +42,13 @@ palpick --separator1 "; " --separator2 "; " \
 # Output:
 # R: 123; G: 34; B: 105
 ```
+
+
+## Installation guide 
+### Build from source
+
+```bash
+# cd to your folder
+git clone https://github.com/paunescudanutz/pal-pick.git
+gcc src/*.c -lm -o bin/palpick
+```
