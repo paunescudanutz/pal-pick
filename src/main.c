@@ -196,10 +196,15 @@ void handleHueSelector(App* app, char c) {
   }
 }
 
+void releaseResources(App* app) {
+  fclose(logFile);
+}
+
 void printResult(App* app, Params* p) {
   disableRawMode(&origTermios);
   Vec3 color = getCurrentColor(app);
   printf(PREFIX RED_LABEL "%d" SEPARATOR GREEN_LABEL "%d" SEPARATOR BLUE_LABEL "%d" POSTFIX, p->prefix, p->redLabel, color.r, p->firstSeparator, p->greenLabel, color.g, p->secondSeparator, p->blueLabel, color.b, p->postfix);
+  releaseResources(app);
 }
 
 int main(int argc, char* argv[]) {
@@ -245,6 +250,5 @@ int main(int argc, char* argv[]) {
     fflush(stdout);
   }
 
-  fclose(logFile);
-  arenaFree(app.masterArena);
+  releaseResources(&app);
 }
