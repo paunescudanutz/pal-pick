@@ -1,6 +1,9 @@
 
 #include <math.h>
 #include <stdio.h>
+#include <sys/ioctl.h>
+#include <termios.h>
+#include <unistd.h>
 
 #include "allocators.h"
 #include "base.h"
@@ -19,6 +22,8 @@
 #define RED_LABEL "%s"
 #define GREEN_LABEL "%s"
 #define BLUE_LABEL "%s"
+
+extern struct termios origTermios;
 
 typedef enum Mode {
   HUE,
@@ -58,3 +63,5 @@ void drawColorInfo(Box zone, Vec3 color);
 void drawHueBand(Box zone);
 void displayHelp();
 void moveCursor(Vec2 pos);
+void disableRawMode(struct termios* origTermios);
+void enableRawMode(struct termios* origTermios);

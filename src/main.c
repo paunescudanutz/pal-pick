@@ -4,13 +4,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/ioctl.h>
-#include <termios.h>
-#include <unistd.h>
 
 #include "allocators.h"
 
 FILE* logFile;
+struct termios origTermios;
 
 HSV stateToHSV(App* app) {
   return (HSV){
@@ -23,35 +21,6 @@ HSV stateToHSV(App* app) {
 Vec3 getCurrentColor(App* app) {
   HSV hsv = stateToHSV(app);
   return hsvToRgb(hsv.h, hsv.s, hsv.v);
-}
-
-static struct termios orig_termios;
-
-// NOTE: vibe coded
-void disableRawMode(void) {
-  tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
-
-  /* Restore cursor and original screen */
-  printf("\033[?1049l");  // leave alternate screen
-  printf("\033[?25h");    // show cursor
-  printf("\0338");        // restore cursor pos
-  fflush(stdout);
-}
-
-// NOTE: vibe coded
-void enableRawMode(void) {
-  tcgetattr(STDIN_FILENO, &orig_termios);
-  // atexit(disableRawMode);
-
-  struct termios raw = orig_termios;
-  raw.c_lflag &= ~(ECHO | ICANON);  // no echo, no line buffering
-  tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
-
-  // printf("\0337");       // save cursor pos
-  printf("\033[?1049h");  // alternate screen
-  printf("\033[2J");      // clear screen
-  printf("\033[H");       // cursor home
-  fflush(stdout);
 }
 
 void parseParams(Params* p, int argc, char* argv[]) {
@@ -228,7 +197,7 @@ void handleHueSelector(App* app, char c) {
 }
 
 void printResult(App* app, Params* p) {
-  disableRawMode();
+  disableRawMode(&origTermios);
   Vec3 color = getCurrentColor(app);
   printf(PREFIX RED_LABEL "%d" SEPARATOR GREEN_LABEL "%d" SEPARATOR BLUE_LABEL "%d" POSTFIX, p->prefix, p->redLabel, color.r, p->firstSeparator, p->greenLabel, color.g, p->secondSeparator, p->blueLabel, color.b, p->postfix);
 }
@@ -239,7 +208,7 @@ int main(int argc, char* argv[]) {
   Params p = {0};
 
   parseParams(&p, argc, argv);
-  enableRawMode();
+  enableRawMode(&origTermios);
 
   Arena arena = {0};
   App app = {0};
