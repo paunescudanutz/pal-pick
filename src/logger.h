@@ -1,4 +1,3 @@
-
 #pragma once
 
 #define LOG_TO_FILE
@@ -11,25 +10,26 @@
 #include <unistd.h>
 
 #ifdef LOG_TO_FILE
-extern FILE *logFile;
+extern FILE* logFile;
 #define LOG_OUT logFile
 #else
 #define LOG_OUT stdout
 #endif
 
 #ifdef LOG_ENABLED
-#define cs_log(level, fmt, ...)                                                \
-  do {                                                                         \
-    fprintf(LOG_OUT,                                                           \
-            "[" level "] : "                                                   \
-            "%s: %s(): %d: " fmt "\n",                                         \
-            __FILE__, __func__, __LINE__, ##__VA_ARGS__);                      \
-    fflush(LOG_OUT);                                                           \
+#define cs_log(level, fmt, ...)                           \
+  do {                                                    \
+    fprintf(LOG_OUT,                                      \
+            "[" level                                     \
+            "] : "                                        \
+            "%s: %s(): %d: " fmt "\n",                    \
+            __FILE__, __func__, __LINE__, ##__VA_ARGS__); \
+    fflush(LOG_OUT);                                      \
   } while (0)
 
 #else
-#define cs_log(level, fmt, ...)                                                \
-  do {                                                                         \
+#define cs_log(level, fmt, ...) \
+  do {                          \
   } while (0)
 #endif
 
@@ -42,26 +42,24 @@ extern FILE *logFile;
 #define logDebug(fmt, ...) cs_log("DEBUG", fmt, ##__VA_ARGS__)
 #define logError(fmt, ...) cs_log("ERROR", fmt, ##__VA_ARGS__)
 #define logAssert(fmt, ...) cs_log("ASSERT FAILED", fmt, ##__VA_ARGS__)
-#define logSeparator(param)                                                    \
-  cs_log("DIV", "=================[ %s ]===================", param)
+#define logSeparator(param) cs_log("DIV", "=================[ %s ]===================", param)
 
-// TODO: refactor this to use this trick:
-// https://www.youtube.com/watch?v=oJH8yX1WxFI
-#define logStr(str, prefix)                                                    \
-  {                                                                            \
-    toStackStr(str, cStr);                                                     \
-    logInfo("%s%s", prefix, cStr);                                             \
+// TODO: refactor this to use this trick: https://www.youtube.com/watch?v=oJH8yX1WxFI
+#define logStr(str, prefix)        \
+  {                                \
+    toStackStr(str, cStr);         \
+    logInfo("%s%s", prefix, cStr); \
   }
 
 #ifdef LOG_ENABLED
-#define initLogger()                                                           \
-  {                                                                            \
-    logFile = fopen("log.txt", "w+");                                          \
+#define initLogger()                  \
+  {                                   \
+    logFile = fopen("log.txt", "w+"); \
   }
 
-#define destroyLogger()                                                        \
-  {                                                                            \
-    fclose(logFile);                                                           \
+#define destroyLogger() \
+  {                     \
+    fclose(logFile);    \
   }
 #else
 #define initLogger() {};

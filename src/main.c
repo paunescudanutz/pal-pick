@@ -20,6 +20,13 @@ FILE* logFile;
 #define SHOW_CURSOR "\033[?25h"
 #define KEY_ENTER 10
 
+#define SEPARATOR "%s"
+#define PREFIX "%s"
+#define POSTFIX "%s"
+#define RED_LABEL "%s"
+#define GREEN_LABEL "%s"
+#define BLUE_LABEL "%s"
+
 typedef enum Mode {
   HUE,
   GRADIENT,
@@ -47,7 +54,7 @@ void drawGradient(char* gradient, Box zone, int hue) {
   int size = 0;
   for (int row = 0; row < zone.height; row++) {
     for (int col = 0; col < zone.width; col++) {
-      Vec3 color = hsvToRgb(hue, (float)row / zone.height, (float)col / zone.width);
+      Vec3 color = hsvToRgb(hue, (1 - (float)(row) / (zone.height - 1)), (1 - (float)(col) / (zone.width - 1)));
 
       size += sprintf(gradient + size, MOVE_CURSOR("%d", "%d") "\x1b[48;2;%d;%d;%dm ", zone.pos.row + row, zone.pos.col + col, color.r, color.g, color.b);
     }
@@ -141,7 +148,7 @@ Vec3 hsvToRgb(float h, float s, float v) {
 void drawHueBand(Box zone) {
   for (int row = 0; row < zone.height; row++) {
     for (int col = 0; col < zone.width; col++) {
-      float hue = ((float)(col) / zone.width) * 360.0f;
+      float hue = ((float)(col) / (zone.width - 1)) * 360.0f;
 
       Vec3 color = hsvToRgb(hue, 1.0f, 1.0f);
 
@@ -157,8 +164,8 @@ void drawHueBand(Box zone) {
 HSV stateToHSV(Vec2 hueCursor, Vec2 gradientCursor, Box zone) {
   return (HSV){
       .h = (float)(hueCursor.col - zone.pos.col) / zone.size.width * 360.0f,
-      .v = ((float)gradientCursor.col - zone.pos.col) / zone.size.width,
-      .s = ((float)gradientCursor.row - zone.pos.row) / zone.size.height,
+      .v = 1 - (((float)gradientCursor.col - zone.pos.col) / (zone.size.width - 1)),
+      .s = 1 - (((float)gradientCursor.row - zone.pos.row) / (zone.size.height - 1)),
   };
 }
 
@@ -202,35 +209,54 @@ void moveCursor(Vec2 pos) {
 
 void displayHelp() {
   printf("palpick (Pallete Picker) - a color picker for the terminal.\n");
-  printf("\nAllows you to quickly select a color from a gimp-like color picker and outputs the resulting rgb color in the format you provide. Useful for integrating in terminal editors. Allows for selecting colors and injecting the result directly into the text.\n");
-  printf("Think of a place where you would need to select a color for a Vec3 color = {123, 34, 105} \n");
+  printf(
+      "\nAllows you to quickly select a color from a gimp-like color picker "
+      "and outputs the resulting rgb color in the format you provide. "
+      "Useful for integrating in terminal editors. Allows for selecting "
+      "colors and injecting the result directly into the text.\n");
+  printf(
+      "Think of a place where you would need to select a color for a Vec3 "
+      "color = {123, 34, 105} \n");
 
   printf("\nUsage:\n");
-  printf("    h, j, k, l - used to move the cursor for selecting a hue or a value\n");
+  printf(
+      "    h, j, k, l - used to move the cursor for selecting a hue or a "
+      "value\n");
   printf("    m - toggle between selecting a hue or selecting a value\n");
   printf("    Enter - select the color and exit\n");
 
   printf("\nOptions:\n");
   printf("    %-20s %s\n", "-h, --help", "Prints this help");
   printf("    %-20s %s\n", "--x, --y", "X/Y origin (upper left hand corner) of widget. Defaults to 1");
-  printf("    %-20s %s\n", "--width, --height", "Width and Height of the Hue Bar and Gradient box - not including the right side info text. Defaults to 20 and 10");
+  printf("    %-20s %s\n", "--width, --height",
+         "Width and Height of the Hue Bar and Gradient box - not including the "
+         "right side info text. Defaults to 20 and 10");
   printf("    %-20s %s\n", "--prefix", "Prepends the final output with this string");
   printf("    %-20s %s\n", "--postfix", "Appends to the final output with this string");
-  printf("    %-20s %s\n", "--separator1", "The char or string to use as the separator between the Red and Green components. Defaults to ','");
-  printf("    %-20s %s\n", "--separator2", "The char or string to use as the separator between the Green and Blue components. Defaults to ','");
+  printf("    %-20s %s\n", "--separator1",
+         "The char or string to use as the separator between the Red and Green "
+         "components. Defaults to ','");
+  printf("    %-20s %s\n", "--separator2",
+         "The char or string to use as the separator between the Green and "
+         "Blue components. Defaults to ','");
   printf("    %-20s %s\n", "--red-label", "The label before the Red component");
   printf("    %-20s %s\n", "--green-label", "The label before the Gree component");
   printf("    %-20s %s\n", "--blue-label", "The label before the Blue component");
   printf("\nExamples: \n");
-  printf("    <command> --pre \"Vec3(\" --post \")\" --separator1 \", \" --separator2 \", \" --> Vec3(123, 34, 105)\n");
-  printf("    <command> --separator1 \"; \" --separator2 \"; \" --red-label \"R: \" --green-label \"G: \" --blue-label \"B: \" --> R: 123; G: 34; B: 105\n");
+  printf(
+      "    <command> --pre \"Vec3(\" --post \")\" --separator1 \", \" "
+      "--separator2 \", \" --> Vec3(123, 34, 105)\n");
+  printf(
+      "    <command> --separator1 \"; \" --separator2 \"; \" --red-label "
+      "\"R: \" --green-label \"G: \" --blue-label \"B: \" --> R: 123; G: "
+      "34; B: 105\n");
 }
 
 void parseParams(Params* p, int argc, char* argv[]) {
   p->x = "1";
   p->y = "1";
-  p->width = "20";
-  p->height = "10";
+  p->width = "30";
+  p->height = "15";
   p->prefix = "";
   p->postfix = "";
   p->firstSeparator = ", ";
@@ -296,8 +322,6 @@ int main(int argc, char* argv[]) {
 
   parseParams(&p, argc, argv);
   enableRawMode();
-
-  logInfo("ansi-picker running:");
 
   Arena arena;
   initArena(&arena, MB(1));
@@ -427,6 +451,5 @@ int main(int argc, char* argv[]) {
 
   color = getCurrentColor(hueCursor, gradientCursor, colorGradient);
 
-  printf("%s%s%d%s%s%d%s%s%d%s", p.prefix, p.redLabel, color.r, p.firstSeparator, p.greenLabel, color.g, p.secondSeparator, p.blueLabel, color.b, p.postfix);
-  logInfo("ansi-picker closed!");
+  printf(PREFIX RED_LABEL "%d" SEPARATOR GREEN_LABEL "%d" SEPARATOR BLUE_LABEL "%d" POSTFIX, p.prefix, p.redLabel, color.r, p.firstSeparator, p.greenLabel, color.g, p.secondSeparator, p.blueLabel, color.b, p.postfix);
 }
